@@ -11,16 +11,17 @@ class AutenticadorControlador extends Controller
     public function registro(Request $request)
     {
     	$request->validate([
-    		'nome' => 'required|string',
+    		'name' => 'required|string',
     		'email' => 'required|string|email|unique:users',
-    		'senha' => 'required|string|confirmed'		
+    		'password' => 'required|string|confirmed'		
     	]);
 
     	$usuario = new User([
-    		'nome' => $request->nome,
+    		'name' => $request->name,
     		'email' => $request->email,
-    		'senha' => bcrypt($request->senha)   	
+    		'password' => bcrypt($request->password)   	
     	]);
+
     	$usuario->save();
 
     	return response()->json([
@@ -32,23 +33,25 @@ class AutenticadorControlador extends Controller
     {
     	$request->validate([
     		'email' => 'required|string|email',
-    		'senha' => 'required|string'		
+    		'password' => 'required|string'		
     	]);
 
     	$credenciais = [
     		'email' => $request->email,
-    		'senha' => $request->senha
+    		'password' => $request->password
     	];
 
-    	if Auth::attempt($credenciais)
+    	if (!Auth::attempt($credenciais))
     		return response()->json([
     			'resposta' => 'Acesso negado'
     		], 401);
 
-    	$usuario = $request->user();
-    	$token = $usuario->createToken('Token de acesso')->accessToken();
+    	$user = $request->user();
+
+    	$token = $user->createToken('Token de acesso')->accessToken;
+
     	return response()->json([
-    		'toke' => $token
+    		'token' => $token
     	], 200);
     }
 
@@ -56,7 +59,7 @@ class AutenticadorControlador extends Controller
     {
     	$request->user()->token()->revoke();
     	return response()->json([
-    		'resposta' =: 'Deslogado com sucesso'
+    		'resposta' => 'Deslogado com sucesso'
     	]);
     }
 }
