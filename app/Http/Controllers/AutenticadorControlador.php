@@ -62,4 +62,8 @@ class AutenticadorControlador extends Controller
     		'resposta' => 'Deslogado com sucesso'
     	]);
     }
+
+    public function ativarregistro($id, $token) {
+        
+    }
 }
