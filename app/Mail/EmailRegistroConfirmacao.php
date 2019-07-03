@@ -29,11 +29,11 @@ class EmailRegistroConfirmacao extends Mailable
      */
     public function build()
     {
-        $link = url('/api/auth/registro/ativar'.
+        $link = url('/api/auth/registro/ativar/'.
                         $this->user->id. '/' .
                         $this->user->token);
 
-        return $this->view('email.EmailRegistroConfirmacao')->with([
+        return $this->view('email.registroconfirmacao')->with([
             'nome' => $this->user->name,
             'email' => $this->user->email,
             'link' => $link,

@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\User;
 use Illuminate\Support\Facades\Auth;
 
+use App\Events\EventNovoRegistro;
+
 class AutenticadorControlador extends Controller
 {
     public function registro(Request $request)
@@ -19,10 +21,13 @@ class AutenticadorControlador extends Controller
     	$usuario = new User([
     		'name' => $request->name,
     		'email' => $request->email,
-    		'password' => bcrypt($request->password)   	
+    		'password' => bcrypt($request->password),
+            'token' =>  str_random(60)
     	]);
 
     	$usuario->save();
+
+        event(new EventNovoRegistro($usuario));
 
     	return response()->json([
     		'resposta' => 'Usuário criado com sucesso'
@@ -33,12 +38,13 @@ class AutenticadorControlador extends Controller
     {
     	$request->validate([
     		'email' => 'required|string|email',
-    		'password' => 'required|string'		
+    		'password' => 'required|string'
     	]);
 
     	$credenciais = [
     		'email' => $request->email,
-    		'password' => $request->password
+    		'password' => $request->password,
+            'active' => 1   
     	];
 
     	if (!Auth::attempt($credenciais))
@@ -63,7 +69,18 @@ class AutenticadorControlador extends Controller
     	]);
     }
 
-    public function ativarregistro($id, $token) {
-        
+    public function ativarregistro($id, $token) 
+    {
+        $user = User::find($id);
+        if($user) {
+            if($user->token == $token){
+                $user->active = true;
+                $user->token = '';
+                $user->save();
+                return view('registroativo');
+            }
+        }
+
+        return view('registroerro');
     }
 }
